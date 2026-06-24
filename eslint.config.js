@@ -1,5 +1,5 @@
-import eslintTs from 'super-configs/eslint/ts';
 import eslintJest from 'super-configs/eslint/jest';
+import eslintTs from 'super-configs/eslint/ts';
 
 export default [
   {

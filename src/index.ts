@@ -1,7 +1,11 @@
+export type {
+  BundlephobiaClientEvents,
+  BundlephobiaClientOptions,
+  RequestEvent,
+} from './BundlephobiaClient';
 export { BundlephobiaClient } from './BundlephobiaClient';
+export type { BundleAsset, BundleSize, DependencySize } from './domain/BundleSize';
+export type { HistoryEntry, PackageHistory } from './domain/PackageHistory';
+export type { SimilarPackage, SimilarPackages } from './domain/SimilarPackages';
 export { BundlephobiaApiError } from './errors/BundlephobiaApiError';
-export type { BundlephobiaClientOptions, RequestEvent, BundlephobiaClientEvents } from './BundlephobiaClient';
 export { PackageResource } from './resources/PackageResource';
-export type { BundleSize, BundleAsset, DependencySize } from './domain/BundleSize';
-export type { PackageHistory, HistoryEntry } from './domain/PackageHistory';
-export type { SimilarPackages, SimilarPackage } from './domain/SimilarPackages';

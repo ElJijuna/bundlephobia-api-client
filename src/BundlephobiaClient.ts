@@ -49,7 +49,7 @@ export interface BundlephobiaClientOptions {
  * const client = new BundlephobiaClient();
  *
  * // Get bundle size for the latest version
- * const size = await client.package('react');
+ * const size = await client.package('react').size();
  *
  * // Get bundle size for a specific version
  * const size18 = await client.package('react').size('18.2.0');
@@ -83,10 +83,15 @@ export class BundlephobiaClient {
    * });
    * ```
    */
-  on<K extends keyof BundlephobiaClientEvents>(event: K, callback: BundlephobiaClientEvents[K]): this {
+  on<K extends keyof BundlephobiaClientEvents>(
+    event: K,
+    callback: BundlephobiaClientEvents[K],
+  ): this {
     const callbacks = this.listeners.get(event) ?? [];
+
     callbacks.push(callback);
     this.listeners.set(event, callbacks);
+
     return this;
   }
 
@@ -95,6 +100,7 @@ export class BundlephobiaClient {
     payload: Parameters<BundlephobiaClientEvents[K]>[0],
   ): void {
     const callbacks = this.listeners.get(event) ?? [];
+
     for (const cb of callbacks) {
       (cb as (p: typeof payload) => void)(payload);
     }
@@ -115,14 +121,20 @@ export class BundlephobiaClient {
   ): Promise<T> {
     const url = buildUrl(`${this.baseUrl}${path}`, params);
     const startedAt = new Date();
+
     let statusCode: number | undefined;
+
     try {
       const response = await fetch(url, { signal });
+
       statusCode = response.status;
+
       if (!response.ok) {
         throw new BundlephobiaApiError(response.status, response.statusText);
       }
-      const data = await response.json() as T;
+
+      const data = (await response.json()) as T;
+
       this.emit('request', {
         url,
         method: 'GET',
@@ -131,9 +143,11 @@ export class BundlephobiaClient {
         durationMs: Date.now() - startedAt.getTime(),
         statusCode,
       });
+
       return data;
     } catch (err) {
       const finishedAt = new Date();
+
       this.emit('request', {
         url,
         method: 'GET',
@@ -143,6 +157,7 @@ export class BundlephobiaClient {
         statusCode,
         error: err instanceof Error ? err : new Error(String(err)),
       });
+
       throw err;
     }
   }
@@ -151,15 +166,12 @@ export class BundlephobiaClient {
    * Returns a {@link PackageResource} for a given package name, providing access
    * to bundle size, version history, and similar packages.
    *
-   * The returned resource can be awaited directly to fetch the bundle size for
-   * the latest version, or chained to access specific methods.
-   *
    * @param name - The package name (e.g. `'react'`, `'@types/node'`)
-   * @returns A chainable package resource
+   * @returns A package resource
    *
    * @example
    * ```typescript
-   * const size    = await client.package('react');
+   * const size    = await client.package('react').size();
    * const size18  = await client.package('react').size('18.2.0');
    * const history = await client.package('react').history();
    * const similar = await client.package('react').similar();
@@ -179,9 +191,17 @@ export class BundlephobiaClient {
  * @internal
  */
 function buildUrl(base: string, params?: Record<string, string | number | boolean>): string {
-  if (!params) return base;
+  if (!params) {
+    return base;
+  }
+
   const entries = Object.entries(params).filter(([, v]) => v !== undefined);
-  if (entries.length === 0) return base;
+
+  if (entries.length === 0) {
+    return base;
+  }
+
   const search = new URLSearchParams(entries.map(([k, v]) => [k, String(v)]));
+
   return `${base}?${search.toString()}`;
 }

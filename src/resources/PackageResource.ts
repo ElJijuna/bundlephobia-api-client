@@ -7,41 +7,20 @@ import type { RequestFn } from './types';
  * Represents a package resource on Bundlephobia, providing access to bundle
  * size, version history, and similar packages.
  *
- * Implements `PromiseLike<BundleSize>` so it can be awaited directly to fetch
- * the bundle size for the latest version.
- *
  * @example
  * ```typescript
- * // Await directly — resolves with the latest version bundle size
- * const size = await client.package('react');
- *
- * // Explicit call with optional version
+ * const size = await client.package('react').size();
  * const size18 = await client.package('react').size('18.2.0');
- *
- * // Size history across all versions
  * const history = await client.package('react').history();
- *
- * // Similar / alternative packages
  * const similar = await client.package('react').similar();
  * ```
  */
-export class PackageResource implements PromiseLike<BundleSize> {
+export class PackageResource {
   /** @internal */
   constructor(
     private readonly request: RequestFn,
     private readonly name: string,
   ) {}
-
-  /**
-   * Allows the resource to be awaited directly, resolving with the bundle size
-   * for the latest version. Delegates to {@link PackageResource.size}.
-   */
-  then<TResult1 = BundleSize, TResult2 = never>(
-    onfulfilled?: ((value: BundleSize) => TResult1 | PromiseLike<TResult1>) | null,
-    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
-  ): PromiseLike<TResult1 | TResult2> {
-    return this.size().then(onfulfilled, onrejected);
-  }
 
   /**
    * Fetches the bundle size for this package.
@@ -61,6 +40,7 @@ export class PackageResource implements PromiseLike<BundleSize> {
    */
   async size(version?: string, signal?: AbortSignal): Promise<BundleSize> {
     const pkg = version ? `${this.name}@${version}` : this.name;
+
     return this.request<BundleSize>('/api/size', { package: pkg }, signal);
   }
 
